@@ -1,0 +1,80 @@
+syntax = "proto3";
+
+package netflix.media.v1;
+
+option go_package = "github.com/netflix-clone/proto/media/v1;mediav1";
+
+service MediaPipelineService {
+  rpc DispatchEncodingJob(DispatchEncodingJobRequest) returns (EncodingJobStatusDto);
+  rpc GetEncodingJobStatus(GetEncodingJobStatusRequest) returns (EncodingJobStatusDto);
+  rpc RetryFailedChunk(RetryFailedChunkRequest) returns (EncodingJobStatusDto);
+  rpc SelectOptimalEdgeNode(SelectOptimalEdgeNodeRequest) returns (SelectOptimalEdgeNodeResponse);
+  rpc SetEdgeNodeDrainMode(SetEdgeNodeDrainModeRequest) returns (EdgeNodeDto);
+}
+
+message DispatchEncodingJobRequest {
+  string episode_id = 1;
+  string ingest_session_id = 2;
+  double min_target_vmaf = 3;
+  repeated string target_codecs = 4;
+}
+
+message RepresentationSummaryDto {
+  string id = 1;
+  string codec = 2;
+  int32 width_px = 3;
+  int32 height_px = 4;
+  int32 bitrate_kbps = 5;
+  double harmonic_mean_vmaf = 6;
+  double min_chunk_vmaf = 7;
+}
+
+message EncodingJobStatusDto {
+  string job_id = 1;
+  string episode_id = 2;
+  string state = 3;
+  int32 total_chunks = 4;
+  int32 completed_chunks = 5;
+  string master_hls_key = 6;
+  string master_dash_key = 7;
+  string error_message = 8;
+  repeated RepresentationSummaryDto representations = 9;
+}
+
+message GetEncodingJobStatusRequest {
+  string job_id = 1;
+}
+
+message RetryFailedChunkRequest {
+  string job_id = 1;
+  int32 chunk_index = 2;
+}
+
+message SelectOptimalEdgeNodeRequest {
+  string client_ip = 1;
+  string country_code = 2;
+  string episode_id = 3;
+}
+
+message SelectOptimalEdgeNodeResponse {
+  string edge_node_id = 1;
+  string edge_base_url = 2;
+  string signed_hmac_token = 3;
+  int64 token_expires_at_unix = 4;
+}
+
+message SetEdgeNodeDrainModeRequest {
+  string edge_node_id = 1;
+  string target_status = 2;
+  string operator_user_id = 3;
+}
+
+message EdgeNodeDto {
+  string id = 1;
+  string node_code = 2;
+  string region_code = 3;
+  string status = 4;
+  double current_bandwidth_gbps = 5;
+  double cache_hit_ratio = 6;
+  int32 active_streams = 7;
+}

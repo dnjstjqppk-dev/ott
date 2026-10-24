@@ -1,0 +1,102 @@
+version: "2"
+sql:
+  - engine: "postgresql"
+    queries: "services/user-profile-svc/internal/db/queries"
+    schema: "infra/migrations"
+    gen:
+      go:
+        package: "db"
+        out: "services/user-profile-svc/internal/db/sqlc"
+        sql_package: "pgx/v5"
+        emit_json_tags: true
+        emit_interface: true
+        overrides:
+          - db_type: "uuid"
+            go_type: "github.com/google/uuid.UUID"
+          - db_type: "uuid"
+            go_type: "github.com/google/uuid.UUID"
+            nullable: true
+          - db_type: "timestamptz"
+            go_type: "time.Time"
+          - db_type: "inet"
+            go_type: "net/netip.Addr"
+  - engine: "postgresql"
+    queries: "services/catalog-svc/internal/db/queries"
+    schema: "infra/migrations"
+    gen:
+      go:
+        package: "db"
+        out: "services/catalog-svc/internal/db/sqlc"
+        sql_package: "pgx/v5"
+        emit_json_tags: true
+        emit_interface: true
+        overrides:
+          - db_type: "uuid"
+            go_type: "github.com/google/uuid.UUID"
+          - db_type: "uuid"
+            go_type: "github.com/google/uuid.UUID"
+            nullable: true
+          - db_type: "timestamptz"
+            go_type: "time.Time"
+          - db_type: "inet"
+            go_type: "net/netip.Addr"
+  - engine: "postgresql"
+    queries: "services/studio-ingest-svc/internal/db/queries"
+    schema: "infra/migrations"
+    gen:
+      go:
+        package: "db"
+        out: "services/studio-ingest-svc/internal/db/sqlc"
+        sql_package: "pgx/v5"
+        emit_json_tags: true
+        emit_interface: true
+        overrides:
+          - db_type: "uuid"
+            go_type: "github.com/google/uuid.UUID"
+          - db_type: "uuid"
+            go_type: "github.com/google/uuid.UUID"
+            nullable: true
+          - db_type: "timestamptz"
+            go_type: "time.Time"
+          - db_type: "inet"
+            go_type: "net/netip.Addr"
+  - engine: "postgresql"
+    queries: "services/playback-svc/internal/db/queries"
+    schema: "infra/migrations"
+    gen:
+      go:
+        package: "db"
+        out: "services/playback-svc/internal/db/sqlc"
+        sql_package: "pgx/v5"
+        emit_json_tags: true
+        emit_interface: true
+        overrides:
+          - db_type: "uuid"
+            go_type: "github.com/google/uuid.UUID"
+          - db_type: "uuid"
+            go_type: "github.com/google/uuid.UUID"
+            nullable: true
+          - db_type: "timestamptz"
+            go_type: "time.Time"
+          - db_type: "inet"
+            go_type: "net/netip.Addr"
+  - engine: "postgresql"
+    queries: "services/billing-svc/internal/db/queries"
+    schema: "infra/migrations"
+    gen:
+      go:
+        package: "db"
+        out: "services/billing-svc/internal/db/sqlc"
+        sql_package: "pgx/v5"
+        emit_json_tags: true
+        emit_interface: true
+        overrides:
+          - db_type: "uuid"
+            go_type: "github.com/google/uuid.UUID"
+          - db_type: "uuid"
+            go_type: "github.com/google/uuid.UUID"
+            nullable: true
+          - db_type: "timestamptz"
+            go_type: "time.Time"
+          - db_type: "inet"
+            go_type: "net/netip.Addr"

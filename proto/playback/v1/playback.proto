@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package netflix.playback.v1;
+
+option go_package = "github.com/netflix-clone/proto/playback/v1;playbackv1";
+
+service PlaybackService {
+  rpc AcquirePlaybackSession(AcquirePlaybackSessionRequest) returns (AcquirePlaybackSessionResponse);
+  rpc ExchangeDrmLicense(ExchangeDrmLicenseRequest) returns (ExchangeDrmLicenseResponse);
+  rpc ReportPlaybackHeartbeat(ReportPlaybackHeartbeatRequest) returns (ReportPlaybackHeartbeatResponse);
+  rpc TerminatePlaybackSession(TerminatePlaybackSessionRequest) returns (TerminatePlaybackSessionResponse);
+}
+
+message AcquirePlaybackSessionRequest {
+  string user_id = 1;
+  string profile_id = 2;
+  string episode_id = 3;
+  string device_id = 4;
+  string client_ip = 5;
+  string country_code = 6;
+}
+
+message AdBreakInsertionDto {
+  int64 cue_point_ms = 1;
+  int32 duration_ms = 2;
+  string ad_hls_url = 3;
+  string ad_dash_url = 4;
+}
+
+message AcquirePlaybackSessionResponse {
+  string playback_session_id = 1;
+  string signed_hls_manifest_url = 2;
+  string signed_dash_manifest_url = 3;
+  string trickplay_vtt_url = 4;
+  string drm_license_token = 5;
+  string widevine_pssh_base64 = 6;
+  int64 resume_bookmark_ms = 7;
+  repeated AdBreakInsertionDto ad_breaks = 8;
+}
+
+message ExchangeDrmLicenseRequest {
+  string playback_session_id = 1;
+  string drm_license_token = 2;
+  bytes client_challenge_payload = 3;
+}
+
+message ExchangeDrmLicenseResponse {
+  bytes license_payload = 1;
+  int64 lease_duration_sec = 2;
+}
+
+message ReportPlaybackHeartbeatRequest {
+  string playback_session_id = 1;
+  string profile_id = 2;
+  string episode_id = 3;
+  int64 current_position_ms = 4;
+  int64 watched_delta_ms = 5;
+  int32 current_bitrate_kbps = 6;
+  int32 buffer_underrun_delta = 7;
+  int32 dropped_frames_delta = 8;
+  bool is_paused = 9;
+}
+
+message ReportPlaybackHeartbeatResponse {
+  bool keep_alive_allowed = 1;
+  string revoke_reason = 2;
+}
+
+message TerminatePlaybackSessionRequest {
+  string playback_session_id = 1;
+  int64 final_position_ms = 2;
+}
+
+message TerminatePlaybackSessionResponse {
+  bool saved = 1;
+}

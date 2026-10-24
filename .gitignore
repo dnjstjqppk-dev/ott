@@ -1,0 +1,56 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Dependency directories
+node_modules/
+vendor/
+
+# Build artifacts
+dist/
+build/
+bin/
+target/
+.nuxt/
+.output/
+
+# IDE and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Go
+*.exe
+*.test
+*.out
+*.prof
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.pytest_cache/
+
+# Flutter / Dart
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+
+# Logs and runtime databases
+*.log
+data/
+minio_data/
+postgres_data/
+redis_data/
+meili_data/
+kafka_data/
+
+# OS files
+.DS_Store
+Thumbs.db

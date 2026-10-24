@@ -1,0 +1,116 @@
+syntax = "proto3";
+
+package netflix.ingest.v1;
+
+option go_package = "github.com/netflix-clone/proto/ingest/v1;ingestv1";
+
+service StudioIngestService {
+  rpc CreateTusSession(CreateTusSessionRequest) returns (CreateTusSessionResponse);
+  rpc AppendTusChunk(AppendTusChunkRequest) returns (AppendTusChunkResponse);
+  rpc CompleteTusUpload(CompleteTusUploadRequest) returns (CompleteTusUploadResponse);
+  rpc GetQcReport(GetQcReportRequest) returns (QcReportDto);
+  rpc SubmitManualQcDecision(SubmitManualQcDecisionRequest) returns (QcReportDto);
+  rpc SaveTimedTextCues(SaveTimedTextCuesRequest) returns (SaveTimedTextCuesResponse);
+}
+
+message CreateTusSessionRequest {
+  string episode_id = 1;
+  string user_id = 2;
+  string partner_org_id = 3;
+  string file_name = 4;
+  string source_container = 5;
+  int64 total_byte_size = 6;
+  string expected_sha256 = 7;
+}
+
+message CreateTusSessionResponse {
+  string ingest_session_id = 1;
+  int32 chunk_size_bytes = 2;
+  int64 current_byte_offset = 3;
+  string upload_endpoint_url = 4;
+}
+
+message AppendTusChunkRequest {
+  string ingest_session_id = 1;
+  int32 chunk_index = 2;
+  int64 start_byte = 3;
+  bytes payload = 4;
+  string chunk_sha256 = 5;
+}
+
+message AppendTusChunkResponse {
+  int64 new_byte_offset = 1;
+  string etag = 2;
+}
+
+message CompleteTusUploadRequest {
+  string ingest_session_id = 1;
+}
+
+message CompleteTusUploadResponse {
+  bool sha256_verified = 1;
+  string computed_sha256 = 2;
+  string triggered_qc_report_id = 3;
+}
+
+message QcIssueDto {
+  string id = 1;
+  string issue_type = 2;
+  string severity = 3;
+  int64 start_ms = 4;
+  int64 end_ms = 5;
+  int64 start_frame = 6;
+  int64 end_frame = 7;
+  string measured_value = 8;
+  string threshold_value = 9;
+  string reviewer_comment = 10;
+  bool is_resolved = 11;
+}
+
+message QcReportDto {
+  string id = 1;
+  string ingest_session_id = 2;
+  string episode_id = 3;
+  string verdict = 4;
+  int32 detected_width = 5;
+  int32 detected_height = 6;
+  int32 detected_fps_num = 7;
+  int32 detected_fps_den = 8;
+  string color_space = 9;
+  string hdr_format = 10;
+  string audio_channels = 11;
+  double integrated_lufs = 12;
+  double true_peak_dbtp = 13;
+  repeated QcIssueDto issues = 14;
+}
+
+message GetQcReportRequest {
+  string episode_id = 1;
+}
+
+message SubmitManualQcDecisionRequest {
+  string qc_report_id = 1;
+  string reviewer_user_id = 2;
+  string verdict = 3;
+  string review_notes = 4;
+}
+
+message TimedTextCueDto {
+  int32 cue_sequence = 1;
+  int64 start_ms = 2;
+  int64 end_ms = 3;
+  repeated string text_lines = 4;
+}
+
+message SaveTimedTextCuesRequest {
+  string track_id = 1;
+  string author_user_id = 2;
+  repeated TimedTextCueDto cues = 3;
+}
+
+message SaveTimedTextCuesResponse {
+  int32 total_cues = 1;
+  int32 cps_violation_count = 2;
+  int32 shot_change_violation_count = 3;
+  string generated_webvtt_url = 4;
+}

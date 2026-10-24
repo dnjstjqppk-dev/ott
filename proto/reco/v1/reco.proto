@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package netflix.reco.v1;
+
+option go_package = "github.com/netflix-clone/proto/reco/v1;recov1";
+
+service RecommendationService {
+  rpc GenerateLoLoMo(GenerateLoLoMoRequest) returns (GenerateLoLoMoResponse);
+  rpc RecordBanditFeedback(RecordBanditFeedbackRequest) returns (RecordBanditFeedbackResponse);
+}
+
+message GenerateLoLoMoRequest {
+  string profile_id = 1;
+  string country_code = 2;
+  string language_code = 3;
+  string max_maturity = 4;
+  bool is_kids = 5;
+}
+
+message LoLoMoItemDto {
+  string title_id = 1;
+  string personalized_artwork_url = 2;
+  int32 match_score_pct = 3;
+  int32 rank_number = 4;
+  int64 bookmark_ms = 5;
+  int64 duration_ms = 6;
+}
+
+message LoLoMoRowDto {
+  string row_id = 1;
+  int32 row_index = 2;
+  string row_type = 3;
+  string header_text = 4;
+  repeated LoLoMoItemDto items = 5;
+}
+
+message GenerateLoLoMoResponse {
+  string snapshot_id = 1;
+  LoLoMoItemDto hero_billboard = 2;
+  repeated LoLoMoRowDto rows = 3;
+}
+
+message RecordBanditFeedbackRequest {
+  string profile_id = 1;
+  string artwork_id = 2;
+  string event_type = 3;
+}
+
+message RecordBanditFeedbackResponse {
+  bool recorded = 1;
+}
+

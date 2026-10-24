@@ -1,0 +1,108 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: media-worker
+  namespace: netflix-prod
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: media-worker
+  template:
+    metadata:
+      labels:
+        app: media-worker
+    spec:
+      containers:
+        - name: worker
+          image: netflix-registry.internal/media-worker:latest
+          env:
+            - name: MEDIA_WORKER_GRPC_ADDR
+              value: "0.0.0.0:50055"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: netflix-cluster-secrets
+                  key: DATABASE_URL
+            - name: EDGE_HMAC_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: netflix-cluster-secrets
+                  key: EDGE_HMAC_SECRET
+          resources:
+            limits:
+              cpu: "8"
+              memory: 16Gi
+            requests:
+              cpu: "2"
+              memory: 4Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: media-worker
+  namespace: netflix-prod
+spec:
+  ports:
+    - port: 50055
+      targetPort: 50055
+  selector:
+    app: media-worker
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: open-connect-edge
+  namespace: netflix-prod
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: open-connect-edge
+  template:
+    metadata:
+      labels:
+        app: open-connect-edge
+    spec:
+      containers:
+        - name: edge
+          image: netflix-registry.internal/open-connect-edge:latest
+          env:
+            - name: EDGE_HTTP_ADDR
+              value: "0.0.0.0:8090"
+            - name: EDGE_HMAC_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: netflix-cluster-secrets
+                  key: EDGE_HMAC_SECRET
+            - name: EDGE_NVME_CACHE_DIR
+              value: "/mnt/nvme/cache"
+          volumeMounts:
+            - name: nvme-cache-volume
+              mountPath: /mnt/nvme/cache
+          ports:
+            - containerPort: 8090
+          resources:
+            limits:
+              cpu: "4"
+              memory: 8Gi
+            requests:
+              cpu: "1"
+              memory: 2Gi
+      volumes:
+        - name: nvme-cache-volume
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: open-connect-edge
+  namespace: netflix-prod
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: 8090
+  selector:
+    app: open-connect-edge
+

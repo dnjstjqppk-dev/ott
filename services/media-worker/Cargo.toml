@@ -1,0 +1,23 @@
+[package]
+name = "media-worker"
+version = "1.0.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1.40", features = ["full"] }
+tonic = "0.12"
+prost = "0.13"
+sqlx = { version = "0.8", features = ["runtime-tokio-rustls", "postgres", "uuid", "rust_decimal"] }
+aws-sdk-s3 = "1.50"
+aws-config = "1.5"
+sha2 = "0.10"
+hmac = "0.12"
+hex = "0.4"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+uuid = { version = "1.10", features = ["v4"] }
+anyhow = "1.0"
+
+[build-dependencies]
+tonic-build = "0.12"
+

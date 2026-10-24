@@ -1,0 +1,61 @@
+name: Netflix Full-Stack Zero-Tolerance CI Gate
+
+on:
+  push:
+    branches: ["main", "release/*"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  governance-and-e2e:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout Monorepo
+        uses: actions/checkout@v4
+
+      - name: Enforce 250-Line Limit and Zero-Placeholder Governance
+        run: |
+          chmod +x .husky/pre-commit
+          FILES=$(git ls-files | grep -vE '^\.husky/')
+          for F in $FILES; do
+            LINES=$(wc -l < "$F" | tr -d ' ')
+            if [ "$LINES" -gt 250 ]; then
+              echo "FATAL: $F exceeds 250 lines ($LINES lines)"
+              exit 1
+            fi
+          done
+
+      - name: Boot Live Infrastructure (PostgreSQL 16, Redis 7, Kafka, MinIO, Meilisearch)
+        run: |
+          docker compose -f infra/docker-compose.yml up -d --wait
+
+      - name: Setup Go 1.23 & Rust 1.81 & Node 22 & Python 3.12
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+
+      - name: Run Frontend Strict Typecheck Gates (User / Studio Partner / Admin)
+        run: |
+          for APP in clients/web-user clients/web-studio-partner clients/web-admin; do
+            (cd "$APP" && npm ci && npm run typecheck && npm run lint)
+          done
+
+      - name: Execute Full End-to-End & Chaos Test Suite
+        env:
+          DATABASE_URL: "postgres://nf_admin:nf_prod_strict_password_2026@localhost:5432/netflix_core?sslmode=disable"
+          REDIS_URL: "redis://localhost:6379/0"
+          MINIO_ENDPOINT: "localhost:9000"
+          MINIO_ACCESS_KEY: "nf_minio_root"
+          MINIO_SECRET_KEY: "nf_minio_secret_key_2026"
+          INGEST_GRPC_ADDR: "localhost:50053"
+          MEDIA_WORKER_GRPC_ADDR: "localhost:50054"
+          PLAYBACK_GRPC_ADDR: "localhost:50055"
+          RECO_GRPC_ADDR: "localhost:50056"
+          BILLING_GRPC_ADDR: "localhost:50052"
+          EDGE_PUBLIC_BASE_URL: "http://localhost:8090"
+        run: |
+          cd tests/e2e
+          go test -v -race -count=1 ./...
+

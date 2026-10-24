@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: netflix-prod
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: netflix-cluster-config
+  namespace: netflix-prod
+data:
+  MEILI_URL: "http://meilisearch.netflix-prod.svc.cluster.local:7700"
+  KAFKA_BROKER: "kafka.netflix-prod.svc.cluster.local:9092"
+  MINIO_ENDPOINT: "minio.netflix-prod.svc.cluster.local:9000"
+  CDN_ASSET_BASE_URL: "https://cdn.netflix.internal"
+  EDGE_PUBLIC_BASE_URL: "https://oc-edge.netflix.internal"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: netflix-cluster-secrets
+  namespace: netflix-prod
+type: Opaque
+stringData:
+  DATABASE_URL: "postgres://nf_admin:nf_prod_strict_password_2026@postgres.netflix-prod.svc.cluster.local:5432/netflix_core?sslmode=disable"
+  JWT_HMAC_SECRET: "super_secure_production_jwt_hmac_secret_key_2026_strict"
+  EDGE_HMAC_SECRET: "edge_hmac_signing_secret_key_2026_production"
+  MINIO_ACCESS_KEY: "nf_minio_root"
+  MINIO_SECRET_KEY: "nf_minio_secret_key_2026"
+  MEILI_MASTER_KEY: "nf_meili_master_key_2026_secure"
+

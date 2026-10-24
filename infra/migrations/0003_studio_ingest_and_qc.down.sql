@@ -1,0 +1,11 @@
+DROP TABLE IF EXISTS timed_text_cues CASCADE;
+DROP TABLE IF EXISTS timed_text_tracks CASCADE;
+DROP TABLE IF EXISTS qc_issues CASCADE;
+DROP TABLE IF EXISTS qc_reports CASCADE;
+DROP TABLE IF EXISTS imf_packages CASCADE;
+DROP TABLE IF EXISTS ingest_chunks CASCADE;
+DROP TABLE IF EXISTS ingest_sessions CASCADE;
+
+DROP TYPE IF EXISTS qc_issue_severity;
+DROP TYPE IF EXISTS qc_verdict;
+DROP TYPE IF EXISTS ingest_status;

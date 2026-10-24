@@ -1,0 +1,113 @@
+syntax = "proto3";
+
+package netflix.iam.v1;
+
+option go_package = "github.com/netflix-clone/proto/iam/v1;iamv1";
+
+service IamService {
+  rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse);
+  rpc RefreshSession(RefreshSessionRequest) returns (AuthenticateResponse);
+  rpc ValidateAccessToken(ValidateAccessTokenRequest) returns (ValidateAccessTokenResponse);
+  rpc ListProfiles(ListProfilesRequest) returns (ListProfilesResponse);
+  rpc UpsertProfile(UpsertProfileRequest) returns (ProfileDto);
+  rpc VerifyProfilePin(VerifyProfilePinRequest) returns (VerifyProfilePinResponse);
+  rpc RevokeDeviceSession(RevokeDeviceSessionRequest) returns (RevokeDeviceSessionResponse);
+}
+
+message AuthenticateRequest {
+  string email = 1;
+  string password = 2;
+  string device_fingerprint = 3;
+  string device_name = 4;
+  string platform = 5;
+  string drm_security_level = 6;
+  string client_ip = 7;
+}
+
+message AuthenticateResponse {
+  string access_token = 1;
+  string refresh_token = 2;
+  int64 expires_in_sec = 3;
+  string user_id = 4;
+  string device_id = 5;
+  string role = 6;
+  string account_status = 7;
+}
+
+message RefreshSessionRequest {
+  string refresh_token = 1;
+  string device_fingerprint = 2;
+  string client_ip = 3;
+}
+
+message ValidateAccessTokenRequest {
+  string access_token = 1;
+}
+
+message ValidateAccessTokenResponse {
+  bool is_valid = 1;
+  string user_id = 2;
+  string profile_id = 3;
+  string device_id = 4;
+  string role = 5;
+  string max_maturity = 6;
+  string country_code = 7;
+}
+
+message ProfileDto {
+  string id = 1;
+  string user_id = 2;
+  string display_name = 3;
+  string avatar_key = 4;
+  bool is_kids = 5;
+  string max_maturity = 6;
+  bool has_pin = 7;
+  string preferred_audio_lang = 8;
+  string preferred_subtitle_lang = 9;
+  bool autoplay_next_episode = 10;
+  bool autoplay_previews = 11;
+  double subtitle_font_scale = 12;
+  double subtitle_bg_opacity = 13;
+  string subtitle_edge_style = 14;
+}
+
+message ListProfilesRequest {
+  string user_id = 1;
+}
+
+message ListProfilesResponse {
+  repeated ProfileDto profiles = 1;
+}
+
+message UpsertProfileRequest {
+  string profile_id = 1;
+  string user_id = 2;
+  string display_name = 3;
+  string avatar_key = 4;
+  bool is_kids = 5;
+  string max_maturity = 6;
+  string raw_pin_code = 7;
+  string preferred_audio_lang = 8;
+  string preferred_subtitle_lang = 9;
+  bool autoplay_next_episode = 10;
+  bool autoplay_previews = 11;
+}
+
+message VerifyProfilePinRequest {
+  string profile_id = 1;
+  string raw_pin_code = 2;
+}
+
+message VerifyProfilePinResponse {
+  bool verified = 1;
+  string profile_scoped_jwt = 2;
+}
+
+message RevokeDeviceSessionRequest {
+  string user_id = 1;
+  string target_device_id = 2;
+}
+
+message RevokeDeviceSessionResponse {
+  bool revoked = 1;
+}

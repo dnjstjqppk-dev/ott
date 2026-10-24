@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package netflix.billing.v1;
+
+option go_package = "github.com/netflix-clone/proto/billing/v1;billingv1";
+
+service BillingService {
+  rpc GetSubscriptionState(GetSubscriptionStateRequest) returns (SubscriptionStateDto);
+  rpc ChangeSubscriptionPlan(ChangeSubscriptionPlanRequest) returns (SubscriptionStateDto);
+  rpc CalculateMonthlyPartnerSettlements(CalculateSettlementsRequest) returns (CalculateSettlementsResponse);
+}
+
+message GetSubscriptionStateRequest {
+  string user_id = 1;
+}
+
+message SubscriptionStateDto {
+  string subscription_id = 1;
+  string plan_code = 2;
+  int32 max_concurrent_streams = 3;
+  int32 max_download_devices = 4;
+  string max_resolution = 5;
+  bool has_ads = 6;
+  string current_period_end = 7;
+}
+
+message ChangeSubscriptionPlanRequest {
+  string user_id = 1;
+  string new_plan_code = 2;
+}
+
+message CalculateSettlementsRequest {
+  string settlement_month = 1;
+  string partner_org_id = 2;
+}
+
+message PartnerSettlementItemDto {
+  string ledger_id = 1;
+  string title_id = 2;
+  double qualified_hours_viewed = 3;
+  int64 gross_payout_krw = 4;
+  int64 net_payout_krw = 5;
+  string status = 6;
+}
+
+message CalculateSettlementsResponse {
+  repeated PartnerSettlementItemDto ledgers = 1;
+}

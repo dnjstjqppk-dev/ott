@@ -1,0 +1,18 @@
+[package]
+name = "open-connect-edge"
+version = "1.0.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1.40", features = ["full"] }
+axum = "0.7"
+aws-sdk-s3 = "1.50"
+aws-config = "1.5"
+hmac = "0.12"
+sha2 = "0.10"
+hex = "0.4"
+lru = "0.12"
+parking_lot = "0.12"
+bytes = "1.7"
+serde = { version = "1.0", features = ["derive"] }
+

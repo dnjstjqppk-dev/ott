@@ -1,0 +1,136 @@
+syntax = "proto3";
+
+package netflix.catalog.v1;
+
+option go_package = "github.com/netflix-clone/proto/catalog/v1;catalogv1";
+
+service CatalogService {
+  rpc GetTitleDetail(GetTitleDetailRequest) returns (TitleDetailResponse);
+  rpc ListSeasonEpisodes(ListSeasonEpisodesRequest) returns (ListSeasonEpisodesResponse);
+  rpc SearchTitles(SearchTitlesRequest) returns (SearchTitlesResponse);
+  rpc CheckLicenseEligibility(CheckLicenseEligibilityRequest) returns (CheckLicenseEligibilityResponse);
+  rpc UpsertTitleMetadata(UpsertTitleMetadataRequest) returns (TitleDto);
+}
+
+message TimecodeMarkerDto {
+  string marker_kind = 1;
+  int64 start_ms = 2;
+  int64 end_ms = 3;
+  int64 start_frame = 4;
+  int64 end_frame = 5;
+}
+
+message EpisodeDto {
+  string id = 1;
+  string title_id = 2;
+  string season_id = 3;
+  int32 episode_number = 4;
+  string localized_title = 5;
+  string localized_synopsis = 6;
+  int64 duration_ms = 7;
+  string still_image_url = 8;
+  int64 user_bookmark_ms = 9;
+  repeated TimecodeMarkerDto markers = 10;
+}
+
+message SeasonDto {
+  string id = 1;
+  int32 season_number = 2;
+  string localized_name = 3;
+  int32 episode_count = 4;
+}
+
+message CreditPersonDto {
+  string person_id = 1;
+  string full_name = 2;
+  string credit_role = 3;
+  string character_name = 4;
+}
+
+message TitleDto {
+  string id = 1;
+  string slug = 2;
+  string type = 3;
+  string localized_title = 4;
+  string localized_synopsis = 5;
+  int32 release_year = 6;
+  string maturity_rating = 7;
+  repeated string maturity_reasons = 8;
+  bool is_netflix_original = 9;
+  string max_resolution = 10;
+  bool supports_hdr10 = 11;
+  bool supports_dolby_vision = 12;
+  bool supports_dolby_atmos = 13;
+  string hero_artwork_url = 14;
+  string logo_png_url = 15;
+  string boxart_url = 16;
+  int32 match_score_pct = 17;
+  bool in_my_list = 18;
+  string user_rating = 19;
+}
+
+message GetTitleDetailRequest {
+  string title_id = 1;
+  string profile_id = 2;
+  string language_code = 3;
+  string country_code = 4;
+}
+
+message TitleDetailResponse {
+  TitleDto title = 1;
+  repeated SeasonDto seasons = 2;
+  repeated EpisodeDto initial_episodes = 3;
+  repeated CreditPersonDto credits = 4;
+  repeated TitleDto similar_titles = 5;
+}
+
+message ListSeasonEpisodesRequest {
+  string season_id = 1;
+  string profile_id = 2;
+  string language_code = 3;
+}
+
+message ListSeasonEpisodesResponse {
+  repeated EpisodeDto episodes = 1;
+}
+
+message SearchTitlesRequest {
+  string query = 1;
+  string genre_code = 2;
+  string profile_id = 3;
+  string max_maturity = 4;
+  string country_code = 5;
+  string language_code = 6;
+  int32 limit = 7;
+  int32 offset = 8;
+}
+
+message SearchTitlesResponse {
+  repeated TitleDto results = 1;
+  int32 total_hits = 2;
+}
+
+message CheckLicenseEligibilityRequest {
+  string title_id = 1;
+  string country_code = 2;
+  bool is_avod_plan = 3;
+}
+
+message CheckLicenseEligibilityResponse {
+  bool is_playable = 1;
+  bool is_downloadable = 2;
+  string license_expires_at = 3;
+}
+
+message UpsertTitleMetadataRequest {
+  string partner_org_id = 1;
+  string slug = 2;
+  string type = 3;
+  string original_title = 4;
+  map<string, string> localized_titles = 5;
+  map<string, string> synopsis = 6;
+  int32 release_year = 7;
+  string maturity_rating = 8;
+  repeated string maturity_reasons = 9;
+  bool is_netflix_original = 10;
+}
