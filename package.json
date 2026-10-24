@@ -7,7 +7,13 @@
     "clients/*"
   ],
   "scripts": {
-    "prepare": "husky"
+    "prepare": "husky",
+    "build": "npm run build:web-user",
+    "build:web-user": "npm run build --workspace=clients/web-user",
+    "build:web-admin": "npm run build --workspace=clients/web-admin",
+    "build:web-studio": "npm run build --workspace=clients/web-studio-partner",
+    "build:all": "npm run build --workspaces --if-present",
+    "deploy": "wrangler deploy"
   },
   "devDependencies": {
     "husky": "^9.1.7"

@@ -47,3 +47,4 @@ func TestRefreshTokenPairAndBcrypt(t *testing.T) {
 		t.Fatalf("expected wrong pin to fail bcrypt check")
 	}
 }
+

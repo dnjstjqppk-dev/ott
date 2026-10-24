@@ -2,6 +2,9 @@
 export default defineNuxtConfig({
   ssr: true,
   devtools: { enabled: false },
+  nitro: {
+    preset: process.env.NITRO_PRESET || 'cloudflare-module'
+  },
   modules: ['@pinia/nuxt', '@nuxtjs/tailwindcss'],
   typescript: {
     strict: true,
@@ -23,4 +26,3 @@ export default defineNuxtConfig({
     }
   }
 })
-

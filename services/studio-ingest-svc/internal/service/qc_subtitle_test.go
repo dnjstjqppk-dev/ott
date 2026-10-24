@@ -32,3 +32,4 @@ func TestCountCueRunesAndWebVttFormat(t *testing.T) {
 		t.Fatalf("missing expected cue timecode range in output: %s", output)
 	}
 }
+
