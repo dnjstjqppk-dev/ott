@@ -15,13 +15,13 @@
     "build:all": "npm run build --workspaces --if-present",
     "deploy": "wrangler deploy"
   },
-  "devDependencies": {
-    "husky": "^9.1.7",
-    "wrangler": "^4.152.0",
-    "oxc-parser": "^0.143.0"
-  },
-  "optionalDependencies": {
+  "dependencies": {
+    "oxc-parser": "^0.143.0",
     "@oxc-parser/binding-linux-x64-gnu": "^0.143.0",
     "@oxc-parser/binding-wasm32-wasi": "^0.143.0"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "wrangler": "^4.152.0"
   }
 }
