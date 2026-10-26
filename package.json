@@ -18,6 +18,7 @@
   "dependencies": {
     "oxc-parser": "^0.143.0",
     "@oxc-parser/binding-linux-x64-gnu": "^0.143.0",
+    "@oxc-parser/binding-linux-x64-musl": "^0.143.0",
     "@oxc-parser/binding-wasm32-wasi": "^0.143.0"
   },
   "devDependencies": {
