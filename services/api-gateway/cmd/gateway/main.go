@@ -41,6 +41,10 @@ func main() {
 	r.Post("/api/v1/auth/login", bff.HandleLogin)
 	r.Group(func(pr chi.Router) {
 		pr.Use(middleware.RequireAuthentication(svcClients.Iam))
+		pr.Get("/api/v1/profiles", bff.HandleProfiles)
+		pr.Post("/api/v1/profiles/{profileId}/verify-pin", bff.HandleVerifyPin)
+		pr.Get("/api/v1/catalog/seasons/{seasonId}/episodes", bff.HandleEpisodes)
+		pr.Post("/api/v1/playback/sessions", bff.HandleAcquirePlayback)
 		pr.Get("/api/v1/browse/lolomo", bff.HandleGetAggregatedHome)
 		pr.Get("/api/v1/catalog/titles/{titleId}", bff.HandleGetTitleModal)
 	})
