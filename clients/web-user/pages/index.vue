@@ -7,12 +7,12 @@ import { useDefaultCatalog } from '~/composables/useDefaultCatalog';
 
 const sessionStore = useSessionStore();
 const config = useRuntimeConfig();
-const { getCuratedCatalog, getCuratedTitleDetail } = useDefaultCatalog();
+const { getCuratedCatalog, getCuratedTitleDetail, getFallbackPoster } = useDefaultCatalog();
 
 const homeData = ref<AggregatedHomeResponse>(getCuratedCatalog());
-const heroPreviewActive = ref<boolean>(false);
 const isHeroMuted = ref<boolean>(true);
 const activeModalTitle = ref<TitleDto | null>(null);
+const activePlaybackTitle = ref<TitleDto | null>(null);
 const isAuthModalOpen = ref<boolean>(false);
 const authModalMode = ref<'SIGN_IN' | 'SELECT_PROFILE'>('SIGN_IN');
 
@@ -22,11 +22,9 @@ async function loadLoLoMoFeed(): Promise<void> {
       `${config.public.apiGatewayUrl}/api/v1/browse/lolomo?lang=ko`,
       { headers: sessionStore.authHeaders }
     );
-    if (res && res.lolomo) {
-      homeData.value = res;
-    }
+    if (res?.lolomo) homeData.value = res;
   } catch {
-    // API Gateway offline; gracefully maintain curated catalog view
+    // API Gateway offline; maintain curated catalog view
   }
 }
 
@@ -42,120 +40,126 @@ async function openTitleDetailModal(titleId: string): Promise<void> {
   }
 }
 
-async function recordArtworkImpression(item: LoLoMoItemDto): Promise<void> {
-  try {
-    await $fetch(`${config.public.apiGatewayUrl}/api/v1/reco/bandit-feedback`, {
-      method: 'POST',
-      headers: sessionStore.authHeaders,
-      body: {
-        profile_id: sessionStore.activeProfile?.id ?? '',
-        artwork_id: item.title_id,
-        event_type: 'IMPRESSION'
-      }
-    });
-  } catch {
-    // Silent telemetry catch
+function startPlayback(titleId: string): void {
+  activePlaybackTitle.value = getCuratedTitleDetail(titleId);
+}
+
+function handleImageError(e: Event): void {
+  const el = e.target as HTMLImageElement;
+  if (el && el.src !== getFallbackPoster()) {
+    el.src = getFallbackPoster();
   }
-}
-
-function handleOpenLogin(): void {
-  authModalMode.value = 'SIGN_IN';
-  isAuthModalOpen.value = true;
-}
-
-function handleOpenProfiles(): void {
-  authModalMode.value = sessionStore.isAuthenticated ? 'SELECT_PROFILE' : 'SIGN_IN';
-  isAuthModalOpen.value = true;
 }
 
 onMounted(() => {
   void loadLoLoMoFeed();
-  setTimeout(() => {
-    heroPreviewActive.value = true;
-  }, 1200);
 });
 </script>
 
 <template>
-  <div class="min-h-screen bg-zinc-950 text-white pb-20 selection:bg-red-600 selection:text-white">
+  <div class="min-h-screen bg-zinc-950 text-white selection:bg-red-600 selection:text-white">
     <NetflixNavbar
-      @open-login="handleOpenLogin"
-      @open-profiles="handleOpenProfiles"
+      @open-login="authModalMode = 'SIGN_IN'; isAuthModalOpen = true;"
+      @open-profiles="authModalMode = sessionStore.isAuthenticated ? 'SELECT_PROFILE' : 'SIGN_IN'; isAuthModalOpen = true;"
+      @openLogin="authModalMode = 'SIGN_IN'; isAuthModalOpen = true;"
+      @openProfiles="authModalMode = sessionStore.isAuthenticated ? 'SELECT_PROFILE' : 'SIGN_IN'; isAuthModalOpen = true;"
     />
 
     <section
       v-if="homeData.lolomo.hero_billboard"
-      class="relative w-full h-[82vh] overflow-hidden bg-black"
+      class="relative w-full h-[80vh] min-h-[580px] overflow-hidden bg-black"
     >
       <img
         :src="homeData.lolomo.hero_billboard.personalized_artwork_url"
         alt="Hero Billboard"
-        class="w-full h-full object-cover transition-opacity duration-1000"
+        class="w-full h-full object-cover"
+        @error="handleImageError"
       />
-      <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent flex flex-col justify-end p-8 md:p-16 pb-28">
-        <div class="max-w-2xl space-y-4">
+      <div class="absolute inset-0 bg-gradient-to-r from-black/95 via-black/50 to-transparent" />
+      <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 to-transparent" />
+
+      <div class="absolute inset-0 flex flex-col justify-end pt-28 pb-16 px-6 md:px-16 z-10">
+        <div class="max-w-xl space-y-4">
           <div class="flex items-center gap-2">
-            <span class="text-red-600 font-black tracking-widest text-base">NETFLIX</span>
+            <span class="text-red-600 font-black tracking-widest text-sm">NETFLIX</span>
             <span class="text-zinc-400 font-semibold text-xs tracking-wider">SERIES</span>
           </div>
-          <h1 class="text-4xl md:text-6xl font-black tracking-tight leading-tight">
+          <h1 class="text-3xl md:text-5xl font-black tracking-tight text-white drop-shadow-md">
             오징어 게임: 시즌 2
           </h1>
-          <div class="flex items-center gap-3 text-sm">
-            <span class="text-emerald-400 font-bold">{{ homeData.lolomo.hero_billboard.match_score_pct }}% 일치</span>
-            <span class="px-1.5 py-0.5 border border-zinc-500 text-xs rounded">19+</span>
-            <span class="px-1.5 py-0.5 border border-zinc-500 text-xs rounded">{{ homeData.subscription.max_resolution }}</span>
-            <span class="text-zinc-300 text-xs">시즌 2개</span>
+          <div class="flex items-center gap-3 text-xs md:text-sm">
+            <span class="text-emerald-400 font-bold">99% 일치</span>
+            <span class="px-1.5 py-0.5 border border-zinc-500 rounded text-xs">19+</span>
+            <span class="px-1.5 py-0.5 border border-zinc-500 rounded text-xs">4K Ultra HD</span>
+            <span class="text-zinc-300">시즌 2개</span>
           </div>
-          <p class="text-zinc-200 text-sm md:text-base line-clamp-3 leading-relaxed">
+          <p class="text-zinc-200 text-xs md:text-sm line-clamp-3 leading-relaxed drop-shadow">
             456억 원의 상금이 걸린 의문의 서바이벌 게임에 다시 뛰어든 기훈. 주최자들의 정체를 파헤치기 위해 목숨을 건 복수가 시작된다.
           </p>
           <div class="flex items-center gap-4 pt-2">
             <button
-              class="px-8 py-3 bg-white text-black font-bold text-sm md:text-base rounded flex items-center gap-2 hover:bg-zinc-200 transition shadow"
-              @click="openTitleDetailModal(homeData.lolomo.hero_billboard.title_id)"
+              class="px-7 py-2.5 bg-white text-black font-bold text-sm rounded flex items-center gap-2 hover:bg-zinc-200 transition shadow"
+              @click="startPlayback(homeData.lolomo.hero_billboard.title_id)"
             >
               ▶ 재생
             </button>
             <button
-              class="px-7 py-3 bg-zinc-700/80 hover:bg-zinc-600/90 text-white font-bold text-sm md:text-base rounded flex items-center gap-2 transition backdrop-blur"
+              class="px-6 py-2.5 bg-zinc-700/80 hover:bg-zinc-600 text-white font-bold text-sm rounded flex items-center gap-2 transition backdrop-blur"
               @click="openTitleDetailModal(homeData.lolomo.hero_billboard.title_id)"
             >
               ⓘ 상세 정보
             </button>
-            <button
-              class="ml-auto p-2 border border-white/60 rounded-full text-xs hover:border-white transition"
-              :aria-label="isHeroMuted ? '음소거 해제' : '음소거'"
-              @click="isHeroMuted = !isHeroMuted"
-            >
-              {{ isHeroMuted ? '🔇' : '🔊' }}
-            </button>
           </div>
+        </div>
+
+        <div class="absolute right-6 md:right-16 bottom-16 flex items-center gap-3">
+          <button
+            class="p-2.5 border border-zinc-400/80 rounded-full hover:border-white transition bg-black/40 text-xs"
+            :aria-label="isHeroMuted ? '음소거 해제' : '음소거'"
+            @click="isHeroMuted = !isHeroMuted"
+          >
+            {{ isHeroMuted ? '🔇' : '🔊' }}
+          </button>
+          <span class="px-2.5 py-1 border-l-2 border-red-600 bg-zinc-900/80 text-xs text-zinc-300 font-bold">
+            19+
+          </span>
         </div>
       </div>
     </section>
 
-    <main class="-mt-20 relative z-10 space-y-10 px-6 md:px-12">
+    <main class="-mt-6 md:-mt-10 relative z-20 space-y-10 px-6 md:px-12 pb-20">
       <section v-for="row in homeData.lolomo.rows" :key="row.row_id" class="space-y-3">
-        <h2 class="text-lg md:text-xl font-bold tracking-tight text-white hover:text-red-500 transition cursor-pointer inline-block">
+        <h2 class="text-base md:text-xl font-bold tracking-tight text-white hover:text-red-500 transition cursor-pointer inline-block">
           {{ row.header_text }} &gt;
         </h2>
         <div class="flex gap-4 overflow-x-auto pb-4 scrollbar-none">
           <article
             v-for="item in row.items"
             :key="item.title_id"
-            class="relative flex-none w-48 md:w-64 group cursor-pointer transition-transform duration-300 hover:scale-105"
-            @mouseenter="recordArtworkImpression(item)"
+            class="relative flex-none w-44 md:w-60 group cursor-pointer transition-transform duration-300 hover:scale-105"
             @click="openTitleDetailModal(item.title_id)"
           >
             <div v-if="row.row_type === 'TOP_10_COUNTRY'" class="flex items-center">
-              <span class="text-7xl md:text-8xl font-black text-zinc-800 select-none -mr-4 z-0">
+              <span
+                class="font-black select-none -mr-4 z-0 text-7xl md:text-8xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]"
+                style="color: #141414; -webkit-text-stroke: 3px #595959;"
+              >
                 {{ item.rank_number }}
               </span>
-              <img :src="item.personalized_artwork_url" :alt="item.title_id" class="w-36 md:w-48 h-28 md:h-36 object-cover rounded shadow z-10" />
+              <img
+                :src="item.personalized_artwork_url"
+                :alt="item.title_id"
+                class="w-32 md:w-44 h-24 md:h-32 object-cover rounded shadow-lg z-10"
+                @error="handleImageError"
+              />
             </div>
             <div v-else>
-              <img :src="item.personalized_artwork_url" :alt="item.title_id" class="w-full h-28 md:h-36 object-cover rounded shadow" />
+              <img
+                :src="item.personalized_artwork_url"
+                :alt="item.title_id"
+                class="w-full h-24 md:h-32 object-cover rounded shadow-lg"
+                @error="handleImageError"
+              />
               <div v-if="item.duration_ms > 0 && item.bookmark_ms > 0" class="w-full h-1 bg-zinc-700 mt-1 rounded overflow-hidden">
                 <div
                   class="h-full bg-red-600"
@@ -185,7 +189,12 @@ onMounted(() => {
         >
           ✕
         </button>
-        <img :src="activeModalTitle.hero_artwork_url" :alt="activeModalTitle.localized_title" class="w-full h-64 md:h-72 object-cover" />
+        <img
+          :src="activeModalTitle.hero_artwork_url"
+          :alt="activeModalTitle.localized_title"
+          class="w-full h-64 md:h-72 object-cover"
+          @error="handleImageError"
+        />
         <div class="p-6 md:p-8 space-y-4">
           <div class="flex items-center justify-between">
             <h3 class="text-2xl font-black">{{ activeModalTitle.localized_title }}</h3>
@@ -200,9 +209,9 @@ onMounted(() => {
           <div class="pt-4 flex gap-3">
             <button
               class="px-8 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded text-sm transition"
-              @click="activeModalTitle = null"
+              @click="startPlayback(activeModalTitle.id); activeModalTitle = null;"
             >
-              지금 재생하기
+              ▶ 지금 재생하기
             </button>
             <button
               class="px-5 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white rounded text-sm transition"
@@ -214,6 +223,12 @@ onMounted(() => {
         </div>
       </div>
     </div>
+
+    <NetflixPlayerModal
+      :is-open="activePlaybackTitle !== null"
+      :title="activePlaybackTitle"
+      @close="activePlaybackTitle = null"
+    />
 
     <NetflixAuthModal
       :is-open="isAuthModalOpen"

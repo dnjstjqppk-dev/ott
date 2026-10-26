@@ -230,3 +230,4 @@ function verifyPinAndComplete(): void {
     </div>
   </div>
 </template>
+
