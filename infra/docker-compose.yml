@@ -43,6 +43,8 @@ services:
       - "9092:9092"
       - "9094:9094"
     environment:
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+      KAFKA_KRAFT_CLUSTER_ID: "4L622nShTUiBenA3heKdgw"
       KAFKA_CFG_NODE_ID: 0
       KAFKA_CFG_PROCESS_ROLES: controller,broker
       KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 0@kafka:9093

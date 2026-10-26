@@ -8,6 +8,14 @@ export default defineNuxtConfig({
     compatibilityDate: '2024-09-23'
   },
   modules: ['@pinia/nuxt', '@nuxtjs/tailwindcss'],
+  optimization: {
+    treeShake: {
+      composables: {
+        client: {},
+        server: {}
+      }
+    }
+  },
   typescript: {
     strict: true,
     typeCheck: false
