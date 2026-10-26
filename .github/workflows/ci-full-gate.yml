@@ -18,7 +18,7 @@ jobs:
       - name: Enforce 250-Line Limit and Zero-Placeholder Governance
         run: |
           chmod +x .husky/pre-commit
-          FILES=$(git ls-files | grep -vE '^\.husky/')
+          FILES=$(git ls-files | grep -vE '^(\.husky/|.*\.pb\.go$|.*/internal/db/sqlc/|.*go\.sum$)')
           for F in $FILES; do
             LINES=$(wc -l < "$F" | tr -d ' ')
             if [ "$LINES" -gt 250 ]; then

@@ -54,3 +54,7 @@ kafka_data/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Wrangler
+.wrangler/
+.wrangler-dry/
