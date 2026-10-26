@@ -2,7 +2,7 @@
 set -e
 
 echo "[GATE 1] Checking for forbidden mock/placeholder keywords..."
-STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -vE '^(\.husky/|.*_grpc\.pb\.go$|.*\.pb\.go$|.*/internal/db/sqlc/|.*go\.sum$)' || true)
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -vE '^(\.husky/|.*_grpc\.pb\.go$|.*\.pb\.go$|.*/internal/db/sqlc/|.*go\.sum$|.*package-lock\.json$)' || true)
 
 if [ -n "$STAGED_FILES" ]; then
   if grep -rnHEi "(TODO|FIXME|mockData|dummyData|sampleData|\/\/\s*\.\.\.)" $STAGED_FILES; then

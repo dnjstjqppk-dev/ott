@@ -16,6 +16,7 @@
     "deploy": "wrangler deploy"
   },
   "devDependencies": {
-    "husky": "^9.1.7"
+    "husky": "^9.1.7",
+    "wrangler": "^4.152.0"
   }
 }
