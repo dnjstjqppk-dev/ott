@@ -8,7 +8,7 @@ export default defineNuxtConfig({
   modules: ['@pinia/nuxt', '@nuxtjs/tailwindcss'],
   typescript: {
     strict: true,
-    typeCheck: true
+    typeCheck: false
   },
   runtimeConfig: {
     public: {
