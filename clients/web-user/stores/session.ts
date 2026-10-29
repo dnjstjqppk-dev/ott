@@ -11,14 +11,24 @@ interface SessionState {
 }
 
 export const useSessionStore = defineStore('nf-session', {
-  state: (): SessionState => ({
-    accessToken: '',
-    refreshToken: '',
-    userId: '',
-    deviceId: '',
-    activeProfile: null,
-    profiles: []
-  }),
+  state: (): SessionState => {
+    if (import.meta.client) {
+      try {
+        const raw = localStorage.getItem('nf-session');
+        if (raw) return JSON.parse(raw) as SessionState;
+      } catch {
+        // ignore corrupted storage
+      }
+    }
+    return {
+      accessToken: '',
+      refreshToken: '',
+      userId: '',
+      deviceId: '',
+      activeProfile: null,
+      profiles: []
+    };
+  },
   getters: {
     isAuthenticated: (state): boolean => state.accessToken.length > 0,
     authHeaders: (state): Record<string, string> => ({
@@ -59,6 +69,7 @@ export const useSessionStore = defineStore('nf-session', {
         { headers: this.authHeaders }
       );
       this.profiles = res.profiles;
+if (import.meta.client) localStorage.setItem('nf-session', JSON.stringify(this.$state));
     },
 
     async selectProfile(profile: ProfileDto, rawPinCode?: string): Promise<boolean> {
@@ -78,7 +89,18 @@ export const useSessionStore = defineStore('nf-session', {
         this.accessToken = verify.profile_scoped_jwt;
       }
       this.activeProfile = profile;
+if (import.meta.client) localStorage.setItem('nf-session', JSON.stringify(this.$state));
       return true;
+    },
+
+    async logout(): Promise<void> {
+      this.accessToken = '';
+      this.refreshToken = '';
+      this.userId = '';
+      this.deviceId = '';
+      this.activeProfile = null;
+      this.profiles = [];
+if (import.meta.client) localStorage.removeItem('nf-session');
     }
   }
 });

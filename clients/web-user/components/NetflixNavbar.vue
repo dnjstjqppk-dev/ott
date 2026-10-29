@@ -3,7 +3,7 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useSessionStore } from '~/stores/session';
 
-const emit = defineEmits<{ (e: 'openLogin'): void; (e: 'openProfiles'): void }>();
+const emit = defineEmits<{ (e: 'openLogin'): void; (e: 'openProfiles'): void; (e: 'openSearch'): void }>();
 const sessionStore = useSessionStore();
 const isScrolled = ref<boolean>(false);
 const showProfileMenu = ref<boolean>(false);
@@ -14,9 +14,8 @@ function handleScroll(): void {
   isScrolled.value = window.scrollY > 30;
 }
 
-function handleLogout(): void {
-  sessionStore.accessToken = '';
-  sessionStore.activeProfile = null;
+async function handleLogout(): Promise<void> {
+  await sessionStore.logout();
   showProfileMenu.value = false;
 }
 
@@ -54,7 +53,7 @@ onBeforeUnmount(() => {
         <button
           class="p-1 hover:text-zinc-300 transition"
           aria-label="검색"
-          @click="isSearchOpen = !isSearchOpen"
+          @click="$emit('openSearch')"
         >
           <svg class="w-5 h-5 fill-none stroke-current" stroke-width="2" viewBox="0 0 24 24">
             <circle cx="11" cy="11" r="8" />

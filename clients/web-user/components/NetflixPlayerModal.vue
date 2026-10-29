@@ -1,9 +1,9 @@
 <!-- clients/web-user/components/NetflixPlayerModal.vue -->
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue';
-import type { TitleDto } from '~/types/netflix';
+import type { TitleDto, PlaybackSessionTicket } from '~/types/netflix';
 
-const props = defineProps<{ title: TitleDto | null; isOpen: boolean }>();
+const props = defineProps<{ title: TitleDto | null; isOpen: boolean; ticket?: PlaybackSessionTicket | null }>();
 const emit = defineEmits<{ (e: 'close'): void }>();
 
 const videoRef = ref<HTMLVideoElement | null>(null);
@@ -91,7 +91,7 @@ onBeforeUnmount(() => {
       ref="videoRef"
       autoplay
       playsinline
-      src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+      :src="props.ticket?.signed_hls_manifest_url || 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'"
       class="absolute inset-0 w-full h-full object-cover z-0"
       @timeupdate="handleTimeUpdate"
       @click="togglePlay"
@@ -166,3 +166,4 @@ onBeforeUnmount(() => {
     </div>
   </div>
 </template>
+

@@ -1,6 +1,6 @@
 <!-- clients/web-user/components/NetflixAuthModal.vue -->
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import type { ProfileDto } from '~/types/netflix';
 import { useSessionStore } from '~/stores/session';
 
@@ -16,56 +16,20 @@ const selectedProfileForPin = ref<ProfileDto | null>(null);
 const errorMessage = ref<string>('');
 const isSubmitting = ref<boolean>(false);
 
-const fallbackProfiles: ProfileDto[] = [
-  {
-    id: 'p-adult-001',
-    user_id: 'u-viewer-001',
-    display_name: '주 시청자',
-    avatar_key: 'avatar-red',
-    is_kids: false,
-    max_maturity: 'AGE_19',
-    has_pin: false,
-    preferred_audio_lang: 'ko',
-    preferred_subtitle_lang: 'ko',
-    autoplay_next_episode: true,
-    autoplay_previews: true,
-    subtitle_font_scale: 1.0,
-    subtitle_bg_opacity: 0.75,
-    subtitle_edge_style: 'DROP_SHADOW'
-  },
-  {
-    id: 'p-kids-002',
-    user_id: 'u-viewer-001',
-    display_name: '키즈',
-    avatar_key: 'avatar-blue',
-    is_kids: true,
-    max_maturity: 'AGE_7',
-    has_pin: false,
-    preferred_audio_lang: 'ko',
-    preferred_subtitle_lang: 'ko',
-    autoplay_next_episode: true,
-    autoplay_previews: false,
-    subtitle_font_scale: 1.2,
-    subtitle_bg_opacity: 0.8,
-    subtitle_edge_style: 'OUTLINE'
-  },
-  {
-    id: 'p-pin-003',
-    user_id: 'u-viewer-001',
-    display_name: '보안 프로필',
-    avatar_key: 'avatar-green',
-    is_kids: false,
-    max_maturity: 'AGE_19',
-    has_pin: true,
-    preferred_audio_lang: 'ko',
-    preferred_subtitle_lang: 'ko',
-    autoplay_next_episode: true,
-    autoplay_previews: true,
-    subtitle_font_scale: 1.0,
-    subtitle_bg_opacity: 0.75,
-    subtitle_edge_style: 'DROP_SHADOW'
+watch(() => props.initialMode, (mode) => {
+  if (mode) currentMode.value = mode;
+});
+
+watch(() => props.isOpen, (open) => {
+  if (open) {
+    currentMode.value = props.initialMode ?? (sessionStore.isAuthenticated ? 'SELECT_PROFILE' : 'SIGN_IN');
+    selectedProfileForPin.value = null;
+    pinCode.value = '';
+    errorMessage.value = '';
   }
-];
+});
+
+
 
 async function handleLogin(): Promise<void> {
   errorMessage.value = '';
@@ -74,10 +38,7 @@ async function handleLogin(): Promise<void> {
     await sessionStore.loginWithCredentials(email.value, password.value, 'browser-device-fp-v1');
     currentMode.value = 'SELECT_PROFILE';
   } catch {
-    sessionStore.accessToken = 'jwt-session-authenticated-2026';
-    sessionStore.userId = 'u-viewer-001';
-    sessionStore.profiles = fallbackProfiles;
-    currentMode.value = 'SELECT_PROFILE';
+    errorMessage.value = '로그인에 실패했습니다. 다시 시도해 주세요.';
   } finally {
     isSubmitting.value = false;
   }
@@ -88,22 +49,37 @@ async function handleSelectProfile(profile: ProfileDto): Promise<void> {
     selectedProfileForPin.value = profile;
     return;
   }
-  sessionStore.activeProfile = profile;
+  const ok = await sessionStore.selectProfile(profile);
+  if (!ok) {
+    errorMessage.value = '프로필 선택에 실패했습니다. 다시 시도해 주세요.';
+    return;
+  }
   emit('authenticated');
   emit('close');
 }
 
-function verifyPinAndComplete(): void {
-  if (pinCode.value === '1234' || pinCode.value.length === 4) {
-    if (selectedProfileForPin.value) {
-      sessionStore.activeProfile = selectedProfileForPin.value;
+async function verifyPinAndComplete(): Promise<void> {
+  if (!selectedProfileForPin.value) return;
+  if (pinCode.value.length !== 4) {
+    errorMessage.value = '잘못된 PIN 번호입니다. 다시 입력해 주세요 (기본: 1234).';
+    return;
+  }
+  isSubmitting.value = true;
+  errorMessage.value = '';
+  try {
+    const ok = await sessionStore.selectProfile(selectedProfileForPin.value, pinCode.value);
+    if (!ok) {
+      errorMessage.value = '잘못된 PIN 번호입니다. 다시 입력해 주세요 (기본: 1234).';
+      return;
     }
     selectedProfileForPin.value = null;
     pinCode.value = '';
     emit('authenticated');
     emit('close');
-  } else {
-    errorMessage.value = '잘못된 PIN 번호입니다. 다시 입력해 주세요 (기본: 1234).';
+  } catch {
+    errorMessage.value = 'PIN 검증에 실패했습니다. 다시 시도해 주세요.';
+  } finally {
+    isSubmitting.value = false;
   }
 }
 </script>
@@ -157,7 +133,7 @@ function verifyPinAndComplete(): void {
         <h2 class="text-2xl font-bold">누가 시청 중인가요?</h2>
         <div class="flex flex-wrap justify-center gap-5 pt-2">
           <div
-            v-for="profile in (sessionStore.profiles.length ? sessionStore.profiles : fallbackProfiles)"
+            v-for="profile in sessionStore.profiles"
             :key="profile.id"
             class="flex flex-col items-center gap-2 cursor-pointer group"
             @click="handleSelectProfile(profile)"
