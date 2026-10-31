@@ -1,0 +1,12 @@
+go 1.27.0
+
+use (
+	./proto
+	./services/api-gateway
+	./services/billing-svc
+	./services/catalog-svc
+	./services/playback-svc
+	./services/studio-ingest-svc
+	./services/user-profile-svc
+	./tests/e2e
+)
