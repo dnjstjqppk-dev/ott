@@ -2,7 +2,7 @@
 <script setup lang="ts">
 import type { LoLoMoItemDto } from '~/types/netflix';
 
-const props = defineProps<{
+defineProps<{
   hero: LoLoMoItemDto;
   isMuted: boolean;
   handleImageError: (e: Event) => void;
@@ -27,10 +27,10 @@ const emit = defineEmits<{
       class="w-full h-full object-cover"
       @error="handleImageError"
     />
-    <div class="absolute inset-0 bg-gradient-to-r from-black/95 via-black/50 to-transparent" />
-    <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 to-transparent" />
+    <div class="absolute inset-0 bg-gradient-to-r from-black/95 via-black/40 to-transparent" />
+    <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/30 to-transparent" />
 
-    <div class="absolute inset-0 flex flex-col justify-end pt-28 pb-16 px-6 md:px-16 z-10">
+    <div class="absolute inset-0 flex flex-col justify-end pt-24 pb-28 md:pb-36 px-6 md:px-16 z-10">
       <div class="max-w-xl space-y-4">
         <div class="flex items-center gap-2">
           <span class="text-red-600 font-black tracking-widest text-sm">NETFLIX</span>
@@ -64,7 +64,7 @@ const emit = defineEmits<{
         </div>
       </div>
 
-      <div class="absolute right-6 md:right-16 bottom-16 flex items-center gap-3">
+      <div class="absolute right-6 md:right-16 bottom-28 md:bottom-36 flex items-center gap-3">
         <button
           class="p-2.5 border border-zinc-400/80 rounded-full hover:border-white transition bg-black/40 text-xs"
           :aria-label="isMuted ? '음소거 해제' : '음소거'"

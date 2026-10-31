@@ -2,12 +2,16 @@
 <script setup lang="ts">
 import type { TitleDto } from '~/types/netflix';
 
-const props = defineProps<{
+defineProps<{
   query: string;
   results: TitleDto[];
   onOpenDetail: (titleId: string) => void;
   onClose: () => void;
   handleImageError: (e: Event) => void;
+}>();
+
+const emit = defineEmits<{
+  (e: 'update:query', value: string): void;
 }>();
 </script>
 
@@ -19,13 +23,14 @@ const props = defineProps<{
     <div class="max-w-5xl mx-auto space-y-6">
       <div class="flex items-center gap-3">
         <input
-          v-model="query"
+          :value="query"
           type="text"
           placeholder="제목, 사람, 장르 검색"
           class="flex-1 px-4 py-3 bg-zinc-900 border border-zinc-700 rounded text-white focus:outline-none focus:border-red-600"
+          @input="emit('update:query', ($event.target as HTMLInputElement).value)"
         />
         <button
-          class="px-4 py-3 bg-zinc-800 hover:bg-zinc-700 rounded text-sm"
+          class="px-4 py-3 bg-zinc-800 hover:bg-zinc-700 rounded text-sm text-white"
           @click="onClose"
         >
           닫기
@@ -35,13 +40,13 @@ const props = defineProps<{
         <article
           v-for="title in results"
           :key="title.id"
-          class="cursor-pointer"
+          class="cursor-pointer group"
           @click="onOpenDetail(title.id); onClose();"
         >
           <img
             :src="title.hero_artwork_url"
             :alt="title.localized_title"
-            class="w-full h-40 object-cover rounded shadow-lg"
+            class="w-full h-40 object-cover rounded shadow-lg group-hover:scale-105 transition duration-300"
             @error="handleImageError"
           />
           <p class="mt-1 text-xs text-zinc-300 truncate">{{ title.localized_title }}</p>

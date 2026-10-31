@@ -3,7 +3,11 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import type { TitleDto, PlaybackSessionTicket } from '~/types/netflix';
 
-const props = defineProps<{ title: TitleDto | null; isOpen: boolean; ticket?: PlaybackSessionTicket | null }>();
+const props = defineProps<{
+  title: TitleDto | null;
+  isOpen: boolean;
+  ticket?: PlaybackSessionTicket | null;
+}>();
 const emit = defineEmits<{ (e: 'close'): void }>();
 
 const videoRef = ref<HTMLVideoElement | null>(null);
@@ -11,7 +15,6 @@ const isPlaying = ref<boolean>(true);
 const isMuted = ref<boolean>(false);
 const currentTime = ref<number>(0);
 const duration = ref<number>(100);
-const volume = ref<number>(1);
 const isControlsVisible = ref<boolean>(true);
 let hideTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -36,7 +39,10 @@ function togglePlay(): void {
 
 function seekRelative(seconds: number): void {
   if (!videoRef.value) return;
-  videoRef.value.currentTime = Math.max(0, Math.min(duration.value, videoRef.value.currentTime + seconds));
+  videoRef.value.currentTime = Math.max(
+    0,
+    Math.min(duration.value, videoRef.value.currentTime + seconds)
+  );
 }
 
 function handleTimeUpdate(): void {
@@ -91,7 +97,10 @@ onBeforeUnmount(() => {
       ref="videoRef"
       autoplay
       playsinline
-      :src="props.ticket?.signed_hls_manifest_url || 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'"
+      :src="
+        props.ticket?.signed_hls_manifest_url ||
+        'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
+      "
       class="absolute inset-0 w-full h-full object-cover z-0"
       @timeupdate="handleTimeUpdate"
       @click="togglePlay"
@@ -112,7 +121,9 @@ onBeforeUnmount(() => {
           </svg>
         </button>
         <div>
-          <h2 class="text-lg md:text-xl font-bold text-white tracking-tight">{{ title.localized_title }}</h2>
+          <h2 class="text-lg md:text-xl font-bold text-white tracking-tight">
+            {{ title.localized_title }}
+          </h2>
           <span class="text-xs text-zinc-400">제1화 · 4K Ultra HD</span>
         </div>
       </div>
@@ -145,10 +156,16 @@ onBeforeUnmount(() => {
           <button class="p-2 hover:text-red-500 transition text-lg" @click="togglePlay">
             {{ isPlaying ? '❚❚' : '▶' }}
           </button>
-          <button class="p-2 text-xs font-bold hover:text-zinc-300" @click="seekRelative(-10)">
+          <button
+            class="p-2 text-xs font-bold hover:text-zinc-300"
+            @click="seekRelative(-10)"
+          >
             ↺ 10초
           </button>
-          <button class="p-2 text-xs font-bold hover:text-zinc-300" @click="seekRelative(10)">
+          <button
+            class="p-2 text-xs font-bold hover:text-zinc-300"
+            @click="seekRelative(10)"
+          >
             ↻ 10초
           </button>
           <button class="p-2 hover:text-zinc-300 transition" @click="toggleMute">
@@ -157,7 +174,9 @@ onBeforeUnmount(() => {
         </div>
 
         <div class="flex items-center gap-4 text-xs font-medium">
-          <span class="px-2 py-0.5 border border-zinc-600 rounded text-zinc-300">한국어 [음성 및 자막]</span>
+          <span class="px-2 py-0.5 border border-zinc-600 rounded text-zinc-300">
+            한국어 [음성 및 자막]
+          </span>
           <button class="hover:text-zinc-300" @click="toggleFullscreen">
             ⛶ 전체화면
           </button>
@@ -166,4 +185,3 @@ onBeforeUnmount(() => {
     </div>
   </div>
 </template>
-

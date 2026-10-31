@@ -2,7 +2,7 @@
 <script setup lang="ts">
 import type { LoLoMoRowDto } from '~/types/netflix';
 
-const props = defineProps<{
+defineProps<{
   rows: LoLoMoRowDto[];
   onOpenDetail: (titleId: string) => void;
   handleImageError: (e: Event) => void;
@@ -10,7 +10,7 @@ const props = defineProps<{
 </script>
 
 <template>
-  <main class="-mt-6 md:-mt-10 relative z-20 space-y-10 px-6 md:px-12 pb-20">
+  <main class="-mt-10 md:-mt-16 relative z-20 space-y-10 px-6 md:px-12 pb-20">
     <section v-for="row in rows" :key="row.row_id" class="space-y-3">
       <h2 class="text-base md:text-xl font-bold tracking-tight text-white hover:text-red-500 transition cursor-pointer inline-block">
         {{ row.header_text }} &gt;

@@ -4,11 +4,16 @@ import { ref, watch } from 'vue';
 import type { ProfileDto } from '~/types/netflix';
 import { useSessionStore } from '~/stores/session';
 
-const props = defineProps<{ isOpen: boolean; initialMode?: 'SIGN_IN' | 'SELECT_PROFILE' }>();
+const props = defineProps<{
+  isOpen: boolean;
+  initialMode?: 'SIGN_IN' | 'SELECT_PROFILE';
+}>();
 const emit = defineEmits<{ (e: 'close'): void; (e: 'authenticated'): void }>();
 
 const sessionStore = useSessionStore();
-const currentMode = ref<'SIGN_IN' | 'SELECT_PROFILE'>(props.initialMode ?? 'SIGN_IN');
+const currentMode = ref<'SIGN_IN' | 'SELECT_PROFILE'>(
+  props.initialMode ?? 'SIGN_IN'
+);
 const email = ref<string>('viewer@netflix.com');
 const password = ref<string>('netflix2026!strict');
 const pinCode = ref<string>('');
@@ -16,26 +21,36 @@ const selectedProfileForPin = ref<ProfileDto | null>(null);
 const errorMessage = ref<string>('');
 const isSubmitting = ref<boolean>(false);
 
-watch(() => props.initialMode, (mode) => {
-  if (mode) currentMode.value = mode;
-});
-
-watch(() => props.isOpen, (open) => {
-  if (open) {
-    currentMode.value = props.initialMode ?? (sessionStore.isAuthenticated ? 'SELECT_PROFILE' : 'SIGN_IN');
-    selectedProfileForPin.value = null;
-    pinCode.value = '';
-    errorMessage.value = '';
+watch(
+  () => props.initialMode,
+  (mode) => {
+    if (mode) currentMode.value = mode;
   }
-});
+);
 
-
+watch(
+  () => props.isOpen,
+  (open) => {
+    if (open) {
+      currentMode.value =
+        props.initialMode ??
+        (sessionStore.isAuthenticated ? 'SELECT_PROFILE' : 'SIGN_IN');
+      selectedProfileForPin.value = null;
+      pinCode.value = '';
+      errorMessage.value = '';
+    }
+  }
+);
 
 async function handleLogin(): Promise<void> {
   errorMessage.value = '';
   isSubmitting.value = true;
   try {
-    await sessionStore.loginWithCredentials(email.value, password.value, 'browser-device-fp-v1');
+    await sessionStore.loginWithCredentials(
+      email.value,
+      password.value,
+      'browser-device-fp-v1'
+    );
     currentMode.value = 'SELECT_PROFILE';
   } catch {
     errorMessage.value = '로그인에 실패했습니다. 다시 시도해 주세요.';
@@ -67,7 +82,10 @@ async function verifyPinAndComplete(): Promise<void> {
   isSubmitting.value = true;
   errorMessage.value = '';
   try {
-    const ok = await sessionStore.selectProfile(selectedProfileForPin.value, pinCode.value);
+    const ok = await sessionStore.selectProfile(
+      selectedProfileForPin.value,
+      pinCode.value
+    );
     if (!ok) {
       errorMessage.value = '잘못된 PIN 번호입니다. 다시 입력해 주세요 (기본: 1234).';
       return;
@@ -77,7 +95,7 @@ async function verifyPinAndComplete(): Promise<void> {
     emit('authenticated');
     emit('close');
   } catch {
-    errorMessage.value = 'PIN 검증에 실패했습니다. 다시 시도해 주세요.';
+    errorMessage.value = 'PIN 인증에 실패했습니다. 다시 시도해 주세요.';
   } finally {
     isSubmitting.value = false;
   }
@@ -90,7 +108,9 @@ async function verifyPinAndComplete(): Promise<void> {
     class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4"
     @click.self="$emit('close')"
   >
-    <div class="relative bg-zinc-900 border border-zinc-800 rounded-xl p-8 max-w-md w-full shadow-2xl text-white">
+    <div
+      class="relative bg-zinc-900 border border-zinc-800 rounded-xl p-8 max-w-md w-full shadow-2xl text-white"
+    >
       <button
         class="absolute top-4 right-4 text-zinc-400 hover:text-white text-lg p-1"
         aria-label="닫기"
@@ -129,7 +149,10 @@ async function verifyPinAndComplete(): Promise<void> {
         </div>
       </div>
 
-      <div v-else-if="currentMode === 'SELECT_PROFILE'" class="space-y-6 text-center">
+      <div
+        v-else-if="currentMode === 'SELECT_PROFILE'"
+        class="space-y-6 text-center"
+      >
         <h2 class="text-2xl font-bold">누가 시청 중인가요?</h2>
         <div class="flex flex-wrap justify-center gap-5 pt-2">
           <div
@@ -140,11 +163,19 @@ async function verifyPinAndComplete(): Promise<void> {
           >
             <div
               class="w-20 h-20 rounded-md border-2 border-transparent group-hover:border-white transition flex items-center justify-center font-black text-2xl shadow-lg"
-              :class="profile.is_kids ? 'bg-amber-600' : profile.has_pin ? 'bg-emerald-700' : 'bg-red-600'"
+              :class="
+                profile.is_kids
+                  ? 'bg-amber-600'
+                  : profile.has_pin
+                  ? 'bg-emerald-700'
+                  : 'bg-red-600'
+              "
             >
               {{ profile.display_name[0] }}
             </div>
-            <span class="text-xs text-zinc-300 group-hover:text-white font-medium">
+            <span
+              class="text-xs text-zinc-300 group-hover:text-white font-medium"
+            >
               {{ profile.display_name }}
             </span>
           </div>
@@ -160,7 +191,9 @@ async function verifyPinAndComplete(): Promise<void> {
       <div v-else class="space-y-5">
         <div>
           <h2 class="text-2xl font-bold">넷플릭스 로그인</h2>
-          <p class="text-xs text-zinc-400 mt-1">계정 정보를 입력하거나 원클릭 게스트 로그인을 진행하세요.</p>
+          <p class="text-xs text-zinc-400 mt-1">
+            계정 정보를 입력하거나 체험 계정으로 시작하세요.
+          </p>
         </div>
 
         <form class="space-y-4" @submit.prevent="handleLogin">
@@ -183,7 +216,9 @@ async function verifyPinAndComplete(): Promise<void> {
             />
           </div>
 
-          <div v-if="errorMessage" class="text-xs text-red-400">{{ errorMessage }}</div>
+          <div v-if="errorMessage" class="text-xs text-red-400">
+            {{ errorMessage }}
+          </div>
 
           <button
             type="submit"
@@ -199,11 +234,10 @@ async function verifyPinAndComplete(): Promise<void> {
             class="text-xs text-zinc-400 hover:text-white transition"
             @click="handleLogin"
           >
-            ⚡ 데모 체험 계정으로 바로 시작하기
+            ⚡ 체험 계정으로 바로 로그인
           </button>
         </div>
       </div>
     </div>
   </div>
 </template>
-

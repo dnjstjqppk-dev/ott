@@ -2,7 +2,7 @@
 <script setup lang="ts">
 import type { TitleDto } from '~/types/netflix';
 
-const props = defineProps<{
+defineProps<{
   items: TitleDto[];
   onOpenDetail: (titleId: string) => void;
   onToggleMyList: (titleId: string) => void;
@@ -18,13 +18,13 @@ const props = defineProps<{
       <article
         v-for="title in items"
         :key="title.id"
-        class="cursor-pointer"
+        class="cursor-pointer group"
         @click="onOpenDetail(title.id)"
       >
         <img
           :src="title.hero_artwork_url"
           :alt="title.localized_title"
-          class="w-full h-40 object-cover rounded shadow-lg"
+          class="w-full h-40 object-cover rounded shadow-lg group-hover:scale-105 transition duration-300"
           @error="handleImageError"
         />
         <p class="mt-1 text-xs text-zinc-300 truncate">{{ title.localized_title }}</p>
