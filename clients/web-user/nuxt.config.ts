@@ -24,11 +24,10 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      apiGatewayUrl:
-        process?.env?.NUXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:8080',
+      apiGatewayUrl: process?.env?.NUXT_PUBLIC_API_GATEWAY_URL || '',
       drmLicenseUrl:
         process?.env?.NUXT_PUBLIC_DRM_LICENSE_URL ||
-        'http://localhost:8080/api/v1/playback/drm-license'
+        '/api/v1/playback/drm-license'
     }
   },
   app: {

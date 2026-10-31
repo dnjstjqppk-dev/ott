@@ -16,13 +16,17 @@
     "deploy": "wrangler deploy"
   },
   "dependencies": {
-    "oxc-parser": "^0.143.0",
+    "oxc-parser": "^0.143.0"
+  },
+  "optionalDependencies": {
     "@oxc-parser/binding-linux-x64-gnu": "^0.143.0",
     "@oxc-parser/binding-linux-x64-musl": "^0.143.0",
     "@oxc-parser/binding-wasm32-wasi": "^0.143.0"
   },
   "devDependencies": {
+    "@types/node": "^22.10.1",
     "husky": "^9.1.7",
+    "vitest": "^3.0.0",
     "wrangler": "^4.152.0"
   }
 }
