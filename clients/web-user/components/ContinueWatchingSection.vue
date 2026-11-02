@@ -12,7 +12,7 @@ defineProps<{
 <template>
   <section v-if="items.length" class="px-6 md:px-12 py-6 space-y-3">
     <h3 class="text-lg md:text-xl font-bold text-white">시청 중인 콘텐츠</h3>
-    <div class="flex gap-3 overflow-x-auto pb-2">
+    <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-none">
       <article
         v-for="item in items"
         :key="item.title_id"
@@ -21,9 +21,10 @@ defineProps<{
       >
         <div class="relative rounded overflow-hidden shadow-lg">
           <img
-            :src="item.personalized_artwork_url"
+            :src="item.personalized_artwork_url || '/posters/fallback.jpg'"
             :alt="item.title_id"
             class="w-full h-24 md:h-32 object-cover"
+            onerror="this.onerror=null;this.src='/posters/fallback.jpg';"
             @error="handleImageError"
           />
           <div class="absolute inset-x-0 bottom-0 h-1 bg-zinc-700">

@@ -30,3 +30,4 @@ export default defineEventHandler(async (event) => {
     allowed_watermark_text: 'USER 2026-KR-456'
   };
 });
+

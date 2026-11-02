@@ -22,13 +22,14 @@ const emit = defineEmits<{
     class="relative w-full h-[80vh] min-h-[580px] overflow-hidden bg-black"
   >
     <img
-      :src="hero.personalized_artwork_url"
+      :src="hero.personalized_artwork_url || '/posters/hero-squidgame2.jpg'"
       alt="Hero Billboard"
-      class="w-full h-full object-cover"
+      class="w-full h-full object-cover object-center"
+      onerror="this.onerror=null;this.src='/posters/hero-squidgame2.jpg';"
       @error="handleImageError"
     />
-    <div class="absolute inset-0 bg-gradient-to-r from-black/95 via-black/40 to-transparent" />
-    <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/30 to-transparent" />
+    <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent" />
+    <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent" />
 
     <div class="absolute inset-0 flex flex-col justify-end pt-24 pb-28 md:pb-36 px-6 md:px-16 z-10">
       <div class="max-w-xl space-y-4">

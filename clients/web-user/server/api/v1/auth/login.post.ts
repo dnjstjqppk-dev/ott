@@ -45,3 +45,4 @@ export default defineEventHandler(async (event) => {
     account_status: 'ACTIVE'
   };
 });
+

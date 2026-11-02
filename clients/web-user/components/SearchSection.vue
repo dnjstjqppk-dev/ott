@@ -3,6 +3,7 @@
 import type { TitleDto } from '~/types/netflix';
 
 defineProps<{
+  isOpen: boolean;
   query: string;
   results: TitleDto[];
   onOpenDetail: (titleId: string) => void;
@@ -17,8 +18,8 @@ const emit = defineEmits<{
 
 <template>
   <div
-    v-if="query"
-    class="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm p-6 md:p-12 overflow-y-auto"
+    v-if="isOpen"
+    class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md p-6 md:p-12 overflow-y-auto"
   >
     <div class="max-w-5xl mx-auto space-y-6">
       <div class="flex items-center gap-3">
@@ -26,6 +27,7 @@ const emit = defineEmits<{
           :value="query"
           type="text"
           placeholder="제목, 사람, 장르 검색"
+          autofocus
           class="flex-1 px-4 py-3 bg-zinc-900 border border-zinc-700 rounded text-white focus:outline-none focus:border-red-600"
           @input="emit('update:query', ($event.target as HTMLInputElement).value)"
         />
@@ -36,7 +38,7 @@ const emit = defineEmits<{
           닫기
         </button>
       </div>
-      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+      <div v-if="results.length" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
         <article
           v-for="title in results"
           :key="title.id"
@@ -44,15 +46,16 @@ const emit = defineEmits<{
           @click="onOpenDetail(title.id); onClose();"
         >
           <img
-            :src="title.hero_artwork_url"
+            :src="title.hero_artwork_url || title.boxart_url || '/posters/fallback.jpg'"
             :alt="title.localized_title"
             class="w-full h-40 object-cover rounded shadow-lg group-hover:scale-105 transition duration-300"
+            onerror="this.onerror=null;this.src='/posters/fallback.jpg';"
             @error="handleImageError"
           />
           <p class="mt-1 text-xs text-zinc-300 truncate">{{ title.localized_title }}</p>
         </article>
       </div>
-      <p v-if="query && !results.length" class="text-zinc-400 text-sm">
+      <p v-else-if="query" class="text-zinc-400 text-sm">
         검색 결과가 없습니다.
       </p>
     </div>

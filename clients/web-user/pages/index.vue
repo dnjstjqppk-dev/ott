@@ -29,9 +29,7 @@ const myListIds = ref<Set<string>>(new Set());
 
 const allCatalogTitles = computed<TitleDto[]>(() => {
   const ids = new Set<string>();
-  if (homeData.value.lolomo.hero_billboard) {
-    ids.add(homeData.value.lolomo.hero_billboard.title_id);
-  }
+  if (homeData.value.lolomo.hero_billboard) ids.add(homeData.value.lolomo.hero_billboard.title_id);
   for (const row of homeData.value.lolomo.rows) {
     for (const item of row.items) ids.add(item.title_id);
   }
@@ -42,9 +40,7 @@ const searchResults = computed<TitleDto[]>(() => {
   const q = searchQuery.value.trim().toLowerCase();
   if (!q) return [];
   return allCatalogTitles.value.filter(
-    (t) =>
-      t.localized_title.toLowerCase().includes(q) ||
-      t.localized_synopsis.toLowerCase().includes(q)
+    (t) => t.localized_title.toLowerCase().includes(q) || t.localized_synopsis.toLowerCase().includes(q)
   );
 });
 
@@ -71,9 +67,7 @@ function toggleMyList(titleId: string): void {
   if (next.has(titleId)) next.delete(titleId);
   else next.add(titleId);
   myListIds.value = next;
-  if (import.meta.client) {
-    localStorage.setItem('nf-my-list', JSON.stringify(Array.from(next)));
-  }
+  if (import.meta.client) localStorage.setItem('nf-my-list', JSON.stringify(Array.from(next)));
 }
 
 async function loadLoLoMoFeed(): Promise<void> {
@@ -118,19 +112,13 @@ async function startPlayback(titleId: string): Promise<void> {
   activePlaybackTicket.value = null;
 
   if (!sessionStore.isAuthenticated || !sessionStore.deviceId) return;
-
   try {
     const ticket = await $fetch<PlaybackSessionTicket>(
       `${config.public.apiGatewayUrl}/api/v1/playback/sessions`,
       {
         method: 'POST',
         headers: sessionStore.authHeaders,
-        body: {
-          episode_id: titleId,
-          device_id: sessionStore.deviceId,
-          client_ip: '',
-          country_code: 'KR'
-        }
+        body: { episode_id: titleId, device_id: sessionStore.deviceId, client_ip: '', country_code: 'KR' }
       }
     );
     activePlaybackTicket.value = ticket;
@@ -141,9 +129,7 @@ async function startPlayback(titleId: string): Promise<void> {
 
 function handleImageError(e: Event): void {
   const el = e.target as HTMLImageElement;
-  if (el && el.src !== getFallbackPoster()) {
-    el.src = getFallbackPoster();
-  }
+  if (el && el.src !== getFallbackPoster()) el.src = getFallbackPoster();
 }
 
 function closePlayback(): void {
@@ -206,11 +192,22 @@ onMounted(() => {
     />
 
     <SearchSection
+      :is-open="isSearchOpen"
       :query="searchQuery"
       :results="searchResults"
+      @update:query="searchQuery = $event"
       :on-open-detail="openTitleDetailModal"
       :on-close="() => { isSearchOpen = false; searchQuery = ''; }"
       :handle-image-error="handleImageError"
+    />
+
+    <NetflixTitleDetailModal
+      :title="activeModalTitle"
+      :is-open="activeModalTitle !== null"
+      :is-in-my-list="activeModalTitle ? myListIds.has(activeModalTitle.id) : false"
+      @close="activeModalTitle = null"
+      @play="(id: string) => { activeModalTitle = null; startPlayback(id); }"
+      @toggle-my-list="toggleMyList"
     />
 
     <NetflixPlayerModal

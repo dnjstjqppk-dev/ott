@@ -24,6 +24,7 @@ describe('useDefaultCatalog', () => {
     const { getFallbackPoster } = useDefaultCatalog();
     const fallback = getFallbackPoster();
 
-    expect(fallback).toMatch(/^https:\/\//);
+    expect(fallback).toMatch(/^\/posters\//);
   });
 });
+

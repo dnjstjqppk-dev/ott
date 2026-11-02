@@ -37,3 +37,4 @@ export default defineEventHandler(async (event) => {
     profile_scoped_jwt: scopedJwt
   };
 });
+

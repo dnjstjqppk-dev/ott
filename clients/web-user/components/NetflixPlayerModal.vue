@@ -97,6 +97,7 @@ onBeforeUnmount(() => {
       ref="videoRef"
       autoplay
       playsinline
+      :poster="title.hero_artwork_url || '/posters/hero-squidgame2.jpg'"
       :src="
         props.ticket?.signed_hls_manifest_url ||
         'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
@@ -105,6 +106,14 @@ onBeforeUnmount(() => {
       @timeupdate="handleTimeUpdate"
       @click="togglePlay"
     />
+
+    <button
+      class="absolute top-4 right-4 z-30 w-10 h-10 bg-black/60 hover:bg-black/90 text-white rounded-full flex items-center justify-center text-sm backdrop-blur transition"
+      aria-label="재생 종료"
+      @click="$emit('close')"
+    >
+      ✕
+    </button>
 
     <div
       class="relative z-10 p-6 flex items-center justify-between bg-gradient-to-b from-black/80 to-transparent transition-opacity duration-300"

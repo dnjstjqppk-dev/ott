@@ -22,9 +22,10 @@ defineProps<{
         @click="onOpenDetail(title.id)"
       >
         <img
-          :src="title.hero_artwork_url"
+          :src="title.hero_artwork_url || title.boxart_url || '/posters/fallback.jpg'"
           :alt="title.localized_title"
           class="w-full h-40 object-cover rounded shadow-lg group-hover:scale-105 transition duration-300"
+          onerror="this.onerror=null;this.src='/posters/fallback.jpg';"
           @error="handleImageError"
         />
         <p class="mt-1 text-xs text-zinc-300 truncate">{{ title.localized_title }}</p>

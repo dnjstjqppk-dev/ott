@@ -30,17 +30,19 @@ defineProps<{
               {{ item.rank_number }}
             </span>
             <img
-              :src="item.personalized_artwork_url"
+              :src="item.personalized_artwork_url || '/posters/fallback.jpg'"
               :alt="item.title_id"
               class="w-32 md:w-44 h-24 md:h-32 object-cover rounded shadow-lg z-10"
+              onerror="this.onerror=null;this.src='/posters/fallback.jpg';"
               @error="handleImageError"
             />
           </div>
           <div v-else>
             <img
-              :src="item.personalized_artwork_url"
+              :src="item.personalized_artwork_url || '/posters/fallback.jpg'"
               :alt="item.title_id"
               class="w-full h-24 md:h-32 object-cover rounded shadow-lg"
+              onerror="this.onerror=null;this.src='/posters/fallback.jpg';"
               @error="handleImageError"
             />
             <div v-if="item.duration_ms > 0 && item.bookmark_ms > 0" class="w-full h-1 bg-zinc-700 mt-1 rounded overflow-hidden">
